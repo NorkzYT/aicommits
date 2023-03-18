@@ -160,6 +160,75 @@ export default testSuite(({ describe }) => {
 			expect(stdout).toMatch(japanesePattern);
 		});
 
+		await test('Generates conventional commit message via conventional config', async () => {
+			data.firstName = 'Osame';
+			await fixture.writeJson('data.json', data);
+
+			await git('add', ['data.json']);
+
+			await aicommits([
+				'config',
+				'set',
+				'conventional=true',
+			]);
+
+			const statusBefore = await git('status', ['--porcelain', '--untracked-files=no']);
+			expect(statusBefore.stdout).toBe('M  data.json');
+
+			// Generate flag should override generate config
+			const committing = aicommits(['--generate', '1']);
+
+			committing.stdout!.on('data', (buffer: Buffer) => {
+				const stdout = buffer.toString();
+				if (stdout.match('└')) {
+					committing.stdin!.write('y');
+					committing.stdin!.end();
+				}
+			});
+
+			await committing;
+
+			const statusAfter = await git('status', ['--porcelain', '--untracked-files=no']);
+			expect(statusAfter.stdout).toBe('');
+
+			const { stdout } = await git('log', ['--oneline']);
+			console.log('Committed with:', stdout);
+
+			expect(stdout).toMatch(/(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test):/);
+		});
+
+		await test('Should not use conventional commit messages by default', async () => {
+			data.firstName = 'Hiroki';
+			await fixture.writeJson('data.json', data);
+
+			await git('add', ['data.json']);
+
+			const statusBefore = await git('status', ['--porcelain', '--untracked-files=no']);
+			expect(statusBefore.stdout).toBe('M  data.json');
+
+			// Generate flag should override generate config
+			const committing = aicommits(['--generate', '1']);
+
+			committing.stdout!.on('data', (buffer: Buffer) => {
+				const stdout = buffer.toString();
+				if (stdout.match('└')) {
+					committing.stdin!.write('y');
+					committing.stdin!.end();
+				}
+			});
+
+			await committing;
+
+			const statusAfter = await git('status', ['--porcelain', '--untracked-files=no']);
+			expect(statusAfter.stdout).toBe('');
+
+			const { stdout } = await git('log', ['--oneline']);
+			console.log('Committed with:', stdout);
+
+			// Regex should not match conventional commit messages
+			expect(stdout).toMatch(/(?!.*(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test):\s)/);
+		});
+
 		await fixture.rm();
 	});
 });
