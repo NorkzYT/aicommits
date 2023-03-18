@@ -91,7 +91,7 @@ const deduplicateMessages = (array: string[]) => Array.from(new Set(array));
 const getBasePrompt = (locale: string, diff: string) => `Write an insightful but concise Git commit message in a complete sentence in present tense for the following diff without prefacing it with anything, the response must be in the language ${locale}:\n${diff}`;
 
 // Conventional commits validation Regex from https://www.regextester.com/109925
-const conventionalCommitsPrompt = 'Make sure to use the conventional commit standard: ^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\\([a-z ]+\\))?: [\\w ]+$.';
+const conventionalCommitsPrompt = 'Make sure to use the conventional commits specification (<type in lowercase>: <subject>):';
 
 const model = 'gpt-3.5-turbo';
 // TODO: update for the new gpt-3.5 model
