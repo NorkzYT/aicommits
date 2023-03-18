@@ -88,7 +88,7 @@ const sanitizeMessage = (message: string) => message.trim().replace(/[\n\r]/g, '
 
 const deduplicateMessages = (array: string[]) => Array.from(new Set(array));
 
-const getBasePrompt = (locale: string, diff: string) => `Write an insightful but concise Git commit message in a complete sentence in present tense for the following diff without prefacing it with anything, the response must be in the language ${locale}:\n${diff}`;
+const getBasePrompt = (locale: string, diff: string) => `Write an insightful but concise Git commit message in a complete sentence in present tense for the following diff without prefacing it with anything, the response must be in the language ${locale}, and make sure to use the conventional commits specification (<type in lowercase>: <subject>)::\n${diff}`;
 
 // Conventional commits validation Regex from https://www.regextester.com/109925
 const conventionalCommitsPrompt = 'Make sure to use the conventional commits specification (<type in lowercase>: <subject>):';
