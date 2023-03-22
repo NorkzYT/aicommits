@@ -17,8 +17,5 @@
   "bin": {
     "aicommits": "./dist/cli.mjs",
     "aic": "./dist/cli.mjs"
-  },
-  "dependencies": {
-    "@dqbd/tiktoken": "^0.4.0"
   }
 }
