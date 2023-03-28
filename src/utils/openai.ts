@@ -20,10 +20,10 @@ const deduplicateMessages = (array: CommitMessage[]) => {
 
 const getBasePrompt = (locale: string) => `
 I want you to act as the author with language ${locale} of a commit message in git.
-I'll enter a git diff, and your job is to convert it into a useful commit message in the present tense.`;
+I'll enter a git diff and your job is to convert create a useful commit message based on the diff in the present tense.`;
 
-const getOutputFormat = () => `
-I want you to output the result in the following format:
+const getOutputFormat = (locale: string) => `
+I want you to output the result in the following format and language ${locale}:
 {
 	"title": "<commit title>",
 	"description": "<commit description>",
@@ -45,7 +45,7 @@ const getCommitTitleFormatPrompt = (useConventionalCommits: boolean, useGitmoji:
 	}
 
 	if (useGitmoji) {
-		commitTitleParts.push('<gitmoji (required)>');
+		commitTitleParts.push('<gitmoji>');
 	}
 
 	commitTitleParts.push('<commit title>');
@@ -56,7 +56,7 @@ const getCommitTitleFormatPrompt = (useConventionalCommits: boolean, useGitmoji:
 const getCommitMessageFormatPrompt = (useConventionalCommits: boolean, useGitmoji: boolean) => {
 	const commitTitleFormat = getCommitTitleFormatPrompt(useConventionalCommits, useGitmoji);
 
-	return `I want you to always output the result in the following format:
+	return `I want you to always output a single example in the following valid JSON format:
 	{
 		"title": "${commitTitleFormat}",
 		"description": "<commit description>"
@@ -73,11 +73,10 @@ const getExtraContextForConventionalCommits = () => {
 		// feat: 'The commit implements a new feature for the application.',
 		// fix: 'The commit fixes a defect in the application.',
 		build: 'alters the build system or external dependencies of the product',
-		change: 'changes the implementation of an existing feature',
 		chore: 'includes a technical or preventative maintenance task',
 		ci: 'continuous integration or continuous delivery scripts or configuration files',
 		deprecate: 'deprecates existing functionality',
-		docs: 'adds or updates documentation',
+		docs: 'changes to README files and markdown (*.md) files',
 		perf: 'improve the performance of algorithms or general execution',
 		remove: 'removes a feature or dependency',
 		refactor: 'code refactoring',
@@ -85,6 +84,7 @@ const getExtraContextForConventionalCommits = () => {
 		security: 'improves security',
 		style: 'updates or reformats the style of the source code',
 		test: 'changes to the suite of automated tests',
+		change: 'changes the implementation of an existing feature',
 	};
 
 	let conventionalCommitDescription = '';
@@ -129,7 +129,7 @@ export const generateCommitMessage = async (
 
 	const systemPrompt = `${basePrompt} ${commitMessageFormatPrompt}`;
 
-	const outputFormat = getOutputFormat();
+	const outputFormat = getOutputFormat(locale);
 	const commitMessageExtraContext = getCommitMessageExtraContext(locale);
 	const conventionalCommitsExtraContext = useConventionalCommits
 		? getExtraContextForConventionalCommits()
