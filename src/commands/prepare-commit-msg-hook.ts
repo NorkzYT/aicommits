@@ -7,7 +7,7 @@ import {
 } from 'kolorist';
 import { getStagedDiff } from '../utils/git.js';
 import { getConfig } from '../utils/config.js';
-import { generateCommitMessage } from '../utils/openai.js';
+import { CommitMessage, generateCommitMessage } from '../utils/openai.js';
 import { KnownError, handleCliError } from '../utils/error.js';
 
 const [messageFilePath, commitSource] = process.argv.slice(2);
@@ -34,7 +34,7 @@ export default () => (async () => {
 
 	const s = spinner();
 	s.start('The AI is analyzing your changes');
-	let messages: string[];
+	let messages: CommitMessage[];
 	try {
 		messages = await generateCommitMessage(
 			config.OPENAI_KEY,
@@ -55,7 +55,9 @@ export default () => (async () => {
 		instructions += `\n${messages.map(message => `# ${message}`).join('\n')}`;
 	} else {
 		instructions += '# Edit the message below and commit:\n';
-		instructions += `\n${messages[0]}\n`;
+		const commitMessage = messages[0];
+
+		instructions += `\n${commitMessage.title}\n\n${commitMessage.description}\n`;
 	}
 
 	await fs.appendFile(
