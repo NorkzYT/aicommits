@@ -55,7 +55,7 @@ export default () => (async () => {
 		instructions += `\n${messages.map(message => `# ${message}`).join('\n')}`;
 	} else {
 		instructions += '# Edit the message below and commit:\n';
-		const commitMessage = messages[0] as CommitMessage;
+		const commitMessage = messages[0];
 
 		instructions += `\n${commitMessage.title}\n\n${commitMessage.description}\n`;
 	}
